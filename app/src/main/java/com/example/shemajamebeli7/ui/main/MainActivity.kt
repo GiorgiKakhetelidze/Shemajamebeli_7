@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_activity_main) as NavHostFragment
         val navController: NavController = navHostFragment.navController
         lifecycleScope.launch {
-            if (viewModel.readTokenFromDatastore() != "DefaultToken" && viewModel.readTokenFromDatastore() != null)
+            if (viewModel.readTokenFromDatastore() != "DefaultToken")
                 navController.navigate(R.id.homeFragment)
         }
     }
