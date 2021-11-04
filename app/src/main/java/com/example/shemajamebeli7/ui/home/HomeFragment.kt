@@ -1,39 +1,37 @@
 package com.example.shemajamebeli7.ui.home
 
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.shemajamebeli7.R
 import com.example.shemajamebeli7.base.BaseFragment
 import com.example.shemajamebeli7.databinding.FragmentHomeBinding
-import com.example.shemajamebeli7.datastore.SessionManager
-import kotlinx.coroutines.Dispatchers
+import com.example.shemajamebeli7.ui.viewmodel.AuthViewModel
 import kotlinx.coroutines.launch
 
 
 class HomeFragment : BaseFragment<FragmentHomeBinding>(FragmentHomeBinding::inflate) {
 
+    private val viewModel by activityViewModels<AuthViewModel>()
+
     override fun init() {
         setListeners()
-        setObservers()
+        setEmail()
     }
 
-    private fun setObservers() {
-        SessionManager.readEmailFromDataStore(context = requireContext())
-            .observe(viewLifecycleOwner, { email ->
-                binding.emailTxtView.text = email
-            })
+    private fun setEmail() {
+        viewLifecycleOwner.lifecycleScope.launch {
+           binding.emailTxtView.text = viewModel.readEmailFromDataStore()
+        }
     }
 
     private fun setListeners() {
         binding.logOutBtn.setOnClickListener {
-            removeTokenFromDataStore()
-            findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
-        }
-    }
+            viewLifecycleOwner.lifecycleScope.launch{
+                viewModel.removeTokenFromDataStore()
+            }
 
-    private fun removeTokenFromDataStore() {
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            SessionManager.removeFromDataStore(context = requireContext())
+            findNavController().navigate(R.id.action_homeFragment_to_loginFragment)
         }
     }
 

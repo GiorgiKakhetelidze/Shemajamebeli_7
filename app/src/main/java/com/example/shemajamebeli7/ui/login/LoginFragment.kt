@@ -4,21 +4,18 @@ import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import com.example.shemajamebeli7.R
 import com.example.shemajamebeli7.base.BaseFragment
-import com.example.shemajamebeli7.checkEmail
+import com.example.shemajamebeli7.extensions.checkEmail
 import com.example.shemajamebeli7.databinding.LoginFragmentBinding
-import com.example.shemajamebeli7.datastore.SessionManager
 import com.example.shemajamebeli7.model.User
+import com.example.shemajamebeli7.ui.viewmodel.AuthViewModel
 import com.example.shemajamebeli7.utils.Resource
-import kotlinx.coroutines.launch
 
 class LoginFragment : BaseFragment<LoginFragmentBinding>(LoginFragmentBinding::inflate) {
 
-    private val viewModel by viewModels<LoginViewModel>()
+    private val viewModel by viewModels<AuthViewModel>()
 
     override fun init() {
         setListeners()
@@ -26,27 +23,15 @@ class LoginFragment : BaseFragment<LoginFragmentBinding>(LoginFragmentBinding::i
         setData()
     }
 
-    override fun onStart() {
-        super.onStart()
-        checkLoggedInUser()
-    }
-
     private fun setData(){
-        setFragmentResultListener("emailRequestKey") { requestKey, bundle ->
+        setFragmentResultListener("emailRequestKey") { _, bundle ->
             val email = bundle.getString("emailBundleKey")!!
             binding.emailField.editText?.setText(email)
         }
-        setFragmentResultListener("passwordRequestKey") { requestKey, bundle ->
+        setFragmentResultListener("passwordRequestKey") { _, bundle ->
             val pass = bundle.getString("passwordBundleKey")
             binding.passwordField.editText?.setText(pass.toString())
         }
-    }
-
-    private fun checkLoggedInUser() {
-        SessionManager.readTokenFromDataStore(context = requireContext()).observe(this, { token ->
-            if (token != SessionManager.DEFAULT_TOKEN)
-                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
-        })
     }
 
     private fun setListeners() {
@@ -94,7 +79,8 @@ class LoginFragment : BaseFragment<LoginFragmentBinding>(LoginFragmentBinding::i
                 is Resource.Success -> {
                     val token = resource.data?.token
                     val email = binding.emailField.editText?.text.toString()
-                    setSession(token!!, email)
+                    val isChecked = binding.checkBoxView.isChecked
+                    viewModel.setSession(token!!, email,isChecked)
                     navigateToHomePage()
                 }
                 is Resource.Error -> {
@@ -110,18 +96,6 @@ class LoginFragment : BaseFragment<LoginFragmentBinding>(LoginFragmentBinding::i
 
     private fun navigateToHomePage() {
         findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
-    }
-
-    private fun setSession(token: String, email: String) {
-        if (binding.checkBoxView.isChecked) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                SessionManager.saveToDataStore(
-                    context = requireContext(),
-                    token = token,
-                    email = email
-                )
-            }
-        }
     }
 
 }

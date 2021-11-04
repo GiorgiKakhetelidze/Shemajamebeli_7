@@ -9,15 +9,16 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.shemajamebeli7.R
 import com.example.shemajamebeli7.base.BaseFragment
-import com.example.shemajamebeli7.checkEmail
+import com.example.shemajamebeli7.extensions.checkEmail
 import com.example.shemajamebeli7.databinding.RegistrationFragmentBinding
 import com.example.shemajamebeli7.model.User
+import com.example.shemajamebeli7.ui.viewmodel.AuthViewModel
 import com.example.shemajamebeli7.utils.Resource
 
 class RegistrationFragment :
     BaseFragment<RegistrationFragmentBinding>(RegistrationFragmentBinding::inflate) {
 
-    private val viewModel by viewModels<RegistrationViewModel>()
+    private val viewModel by viewModels<AuthViewModel>()
 
     override fun init() {
         setListeners()
